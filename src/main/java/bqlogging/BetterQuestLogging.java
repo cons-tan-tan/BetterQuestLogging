@@ -1,15 +1,20 @@
 package bqlogging;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartingEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-@Mod(modid = BetterQuestLogging.MODID, version = Tags.VERSION, name = "Better Quest Logging", acceptedMinecraftVersions = "[1.7.10]")
+@Mod(
+    modid = BetterQuestLogging.MODID,
+    version = Tags.VERSION,
+    name = "Better Quest Logging",
+    acceptedMinecraftVersions = "[1.7.10]")
 public class BetterQuestLogging {
 
     public static final String MODID = "bqlogging";
