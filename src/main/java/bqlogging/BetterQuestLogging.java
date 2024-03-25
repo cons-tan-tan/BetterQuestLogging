@@ -24,7 +24,8 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
     version = Tags.VERSION,
     name = "BetterQuestLogging",
     acceptedMinecraftVersions = "[1.7.10]",
-    dependencies = "required-after:betterquesting")
+    dependencies = "required-after:betterquesting",
+    acceptableRemoteVersions = "*")
 public class BetterQuestLogging {
 
     public static final String MODID = "bqlogging";
