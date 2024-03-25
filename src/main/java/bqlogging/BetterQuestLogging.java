@@ -10,6 +10,8 @@ import org.apache.logging.log4j.Logger;
 
 import betterquesting.api.api.QuestingAPI;
 import betterquesting.api.events.QuestEvent;
+import betterquesting.api.properties.NativeProps;
+import betterquesting.api.questing.IQuest;
 import betterquesting.api2.utils.QuestTranslation;
 import betterquesting.questing.QuestDatabase;
 import cpw.mods.fml.common.Loader;
@@ -20,7 +22,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 @Mod(
     modid = BetterQuestLogging.MODID,
     version = Tags.VERSION,
-    name = "Better Quest Logging",
+    name = "BetterQuestLogging",
     acceptedMinecraftVersions = "[1.7.10]",
     dependencies = "required-after:betterquesting")
 public class BetterQuestLogging {
@@ -46,18 +48,29 @@ public class BetterQuestLogging {
 
     @SubscribeEvent
     public void onQuestEvent(QuestEvent event) {
+        if (event.getType() != QuestEvent.Type.COMPLETED) {
+            return;
+        }
         Set<UUID> questIds = event.getQuestIDs();
         if (questIds.isEmpty()) {
             return;
         }
+
         String playerName = QuestingAPI.getPlayer(event.getPlayerID())
             .getDisplayName();
         questIds.forEach(uuid -> {
+            IQuest quest = QuestDatabase.INSTANCE.get(uuid);
+            if (quest == null) {
+                LOG.error(String.format("Quest with ID %s does not exist", uuid));
+                return;
+            }
             LOG.info(
                 String.format(
-                    "%s completed the quest: %s",
+                    "%s completed the quest %s: %s",
                     playerName,
-                    QuestTranslation.translateQuestName(uuid, QuestDatabase.INSTANCE.get(uuid))));
+                    quest.getProperty(NativeProps.GLOBAL) ? "[GLOBAL]" : "",
+                    QuestTranslation.translateQuestName(uuid, quest)
+                        .replaceAll("§.", "")));
         });
     }
 
