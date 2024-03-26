@@ -8,7 +8,6 @@ import net.minecraftforge.common.MinecraftForge;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import betterquesting.api.api.QuestingAPI;
 import betterquesting.api.events.QuestEvent;
 import betterquesting.api.properties.NativeProps;
 import betterquesting.api.questing.IQuest;
@@ -57,19 +56,17 @@ public class BetterQuestLogging {
             return;
         }
 
-        String playerName = QuestingAPI.getPlayer(event.getPlayerID())
-            .getDisplayName();
         questIds.forEach(uuid -> {
             IQuest quest = QuestDatabase.INSTANCE.get(uuid);
             if (quest == null) {
                 LOG.error(String.format("Quest with ID %s does not exist", uuid));
                 return;
+            } else if (quest.getProperty(NativeProps.SILENT)) {
+                return;
             }
             LOG.info(
                 String.format(
-                    "%s completed the quest %s: %s",
-                    playerName,
-                    quest.getProperty(NativeProps.GLOBAL) ? "[GLOBAL]" : "",
+                    "Quest Completed: %s",
                     QuestTranslation.translateQuestName(uuid, quest)
                         .replaceAll("§.", "")));
         });
