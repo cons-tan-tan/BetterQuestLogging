@@ -1,5 +1,6 @@
 package bqlogging;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -13,10 +14,13 @@ import betterquesting.api.properties.NativeProps;
 import betterquesting.api.questing.IQuest;
 import betterquesting.api2.utils.QuestTranslation;
 import betterquesting.questing.QuestDatabase;
+import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.eventhandler.EventPriority;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 
 @Mod(
     modid = BetterQuestLogging.MODID,
@@ -30,6 +34,9 @@ public class BetterQuestLogging {
     public static final String MODID = "bqlogging";
     public static final Logger LOG = LogManager.getLogger(MODID);
 
+    private static final Set<UUID> COMPLETED_QUESTS = new HashSet<>();
+    private static int tickCount = 60;
+
     // @SidedProxy(clientSide = MODID + ".ClientProxy", serverSide = MODID + ".CommonProxy")
     // public static CommonProxy proxy;
 
@@ -41,6 +48,9 @@ public class BetterQuestLogging {
         if (Loader.isModLoaded("betterquesting")) {
             LOG.info("BetterQuesting is already loaded");
             MinecraftForge.EVENT_BUS.register(this);
+            FMLCommonHandler.instance()
+                .bus()
+                .register(this);
         } else {
             LOG.error("BetterQuesting is not loaded");
         }
@@ -51,12 +61,21 @@ public class BetterQuestLogging {
         if (event.getType() != QuestEvent.Type.COMPLETED) {
             return;
         }
-        Set<UUID> questIds = event.getQuestIDs();
-        if (questIds.isEmpty()) {
+        COMPLETED_QUESTS.addAll(event.getQuestIDs());
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.START) {
             return;
         }
 
-        questIds.forEach(uuid -> {
+        if (--tickCount != 0) {
+            return;
+        }
+        tickCount = 60;
+
+        COMPLETED_QUESTS.forEach(uuid -> {
             IQuest quest = QuestDatabase.INSTANCE.get(uuid);
             if (quest == null) {
                 LOG.error(String.format("Quest with ID %s does not exist", uuid));
@@ -70,6 +89,7 @@ public class BetterQuestLogging {
                     QuestTranslation.translateQuestName(uuid, quest)
                         .replaceAll("§.", "")));
         });
+        COMPLETED_QUESTS.clear();
     }
 
     // @Mod.EventHandler
