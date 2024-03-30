@@ -85,7 +85,7 @@ public class BetterQuestLogging {
             }
             LOG.info(
                 String.format(
-                    "Quest Completed: %s",
+                    "Quest Complete: %s",
                     QuestTranslation.translateQuestName(uuid, quest)
                         .replaceAll("§.", "")));
         });
